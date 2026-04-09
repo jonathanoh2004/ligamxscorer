@@ -1,0 +1,45 @@
+type Match @model
+  @auth(rules: [
+    { allow: groups, groups: ["admin"], operations: [create, update, delete] },
+    { allow: private, operations: [read] }
+  ]) {
+  weekId: String! @index(name: "byWeekId", queryField: "matchesByWeek")
+  matchId: String!
+  homeTeam: String!
+  awayTeam: String!
+  matchDate: AWSDateTime!
+  result: String  # "H" = home win, "D" = draw, "A" = away win, null = not played yet
+  locked: Boolean
+}
+
+type Prediction @model
+  @auth(rules: [
+    { allow: owner, ownerField: "username", operations: [create, update, read] },
+    { allow: groups, groups: ["admin"], operations: [read] }
+  ]) {
+  username: String! @index(name: "byUsername", queryField: "predictionsByUser")
+  weekMatchId: String!  # format: weekId#matchId
+  weekId: String! @index(name: "byWeek", queryField: "predictionsByWeek")
+  matchId: String!
+  prediction: String!  # "H", "D", or "A"
+}
+
+type WeeklyScore @model
+  @auth(rules: [
+    { allow: groups, groups: ["admin"], operations: [create, update, delete, read] },
+    { allow: private, operations: [read] }
+  ]) {
+  weekId: String! @index(name: "byWeekId", queryField: "scoresByWeek")
+  username: String!
+  score: Int!
+}
+
+type SeasonScore @model
+  @auth(rules: [
+    { allow: groups, groups: ["admin"], operations: [create, update, delete, read] },
+    { allow: private, operations: [read] }
+  ]) {
+  season: String! @index(name: "bySeason", queryField: "scoresBySeason")
+  username: String!
+  totalScore: Int!
+}

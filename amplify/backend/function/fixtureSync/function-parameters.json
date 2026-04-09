@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "api": {
+      "ligamxscorer": [
+        "Query",
+        "Mutation",
+        "Subscription"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "apifootballKeyParam",
+      "environmentVariableName": "APIFOOTBALL_KEY_PARAM"
+    }
+  ]
+}
