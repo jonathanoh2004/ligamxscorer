@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LanguageContext';
 import LangToggle from '../components/LangToggle';
@@ -15,6 +16,12 @@ export default function HomeScreen() {
   const [tab, setTab] = useState('picks');
   const [activeGroup, setActiveGroup] = useState(null);
 
+  useEffect(() => {
+    AsyncStorage.getItem('activeGroup').then(val => {
+      if (val) setActiveGroup(JSON.parse(val));
+    });
+  }, []);
+
   const TABS = [
     { key: 'picks', label: t.myPicks },
     { key: 'grid', label: t.grid },
@@ -25,6 +32,7 @@ export default function HomeScreen() {
 
   function handleSelectGroup(group) {
     setActiveGroup(group);
+    AsyncStorage.setItem('activeGroup', JSON.stringify(group));
     setTab('grid');
   }
 

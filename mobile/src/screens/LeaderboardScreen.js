@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { generateClient } from 'aws-amplify/api';
 import { membersByGroup, scoresBySeason, scoresByWeek } from '../graphql/queries';
 import { useLang } from '../context/LanguageContext';
@@ -25,6 +25,7 @@ export default function LeaderboardScreen({ group }) {
   const { t } = useLang();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [view, setView] = useState('season');
   const weekId = getCurrentWeekId();
 
@@ -58,6 +59,12 @@ export default function LeaderboardScreen({ group }) {
 
   useEffect(() => { load(); }, [load]);
 
+  async function onRefresh() {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  }
+
   const sorted = [...rows].sort((a, b) =>
     view === 'season' ? b.season - a.season : b.weekly - a.weekly
   );
@@ -87,7 +94,7 @@ export default function LeaderboardScreen({ group }) {
         <Text style={[styles.headerCell, styles.scoreCol]}>{t.points}</Text>
       </View>
 
-      <ScrollView>
+      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}>
         {sorted.map((row, i) => {
           const pts = view === 'season' ? row.season : row.weekly;
           const isFirst = i === 0 && pts > 0;

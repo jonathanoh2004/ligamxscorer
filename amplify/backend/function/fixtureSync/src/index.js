@@ -74,8 +74,11 @@ function parseEvent(event) {
   const matchDate = event.date;
   const weekId = getWeekId(matchDate);
 
+  const FINAL_STATUSES = ["STATUS_FINAL", "STATUS_FULL_TIME", "STATUS_FT"];
+  const isFinal = FINAL_STATUSES.includes(status);
+
   let result = null;
-  if (status === "STATUS_FINAL") {
+  if (isFinal) {
     const hScore = parseInt(home.score || "0", 10);
     const aScore = parseInt(away.score || "0", 10);
     result = hScore > aScore ? "H" : aScore > hScore ? "A" : "D";
@@ -132,8 +135,9 @@ async function syncResults() {
   console.log("Fetching finished Liga MX results from ESPN...");
   const weekRange = getCurrentWeekRange();
   const data = await espnRequest(`dates=${weekRange}`);
+  const FINAL_STATUSES = ["STATUS_FINAL", "STATUS_FULL_TIME", "STATUS_FT"];
   const events = (data.events || []).filter(e =>
-    e.competitions[0].status.type.name === "STATUS_FINAL"
+    FINAL_STATUSES.includes(e.competitions[0].status.type.name)
   );
 
   if (!events.length) {
@@ -178,26 +182,39 @@ async function scorePredictions(matchId, actualResult, weekId) {
   for (const prediction of (result.Items || [])) {
     if (prediction.prediction !== actualResult) continue;
     const username = prediction.username;
+    const now = new Date().toISOString();
 
+    // Only award point if this match hasn't been scored for this user yet (idempotent)
     await ddb.send(new UpdateCommand({
       TableName: WEEKLY_SCORE_TABLE,
       Key: { id: `${weekId}#${username}` },
-      UpdateExpression: "SET weekId = :weekId, username = :username, score = if_not_exists(score, :zero) + :one, __typename = :type, createdAt = if_not_exists(createdAt, :now), updatedAt = :now",
+      ConditionExpression: "attribute_not_exists(scoredMatches) OR NOT contains(scoredMatches, :matchId)",
+      UpdateExpression: "SET weekId = :weekId, username = :username, score = if_not_exists(score, :zero) + :one, #typename = :type, createdAt = if_not_exists(createdAt, :now), updatedAt = :now ADD scoredMatches :matchIdSet",
+      ExpressionAttributeNames: { "#typename": "__typename" },
       ExpressionAttributeValues: {
         ":weekId": weekId, ":username": username, ":zero": 0, ":one": 1,
-        ":type": "WeeklyScore", ":now": new Date().toISOString(),
+        ":type": "WeeklyScore", ":now": now,
+        ":matchId": matchId, ":matchIdSet": new Set([matchId]),
       },
-    }));
+    })).catch(e => {
+      if (e.name !== "ConditionalCheckFailedException") throw e;
+      console.log(`Match ${matchId} already scored for ${username}, skipping.`);
+    });
 
     await ddb.send(new UpdateCommand({
       TableName: SEASON_SCORE_TABLE,
       Key: { id: `${SEASON}#${username}` },
-      UpdateExpression: "SET season = :season, username = :username, totalScore = if_not_exists(totalScore, :zero) + :one, __typename = :type, createdAt = if_not_exists(createdAt, :now), updatedAt = :now",
+      ConditionExpression: "attribute_not_exists(scoredMatches) OR NOT contains(scoredMatches, :matchId)",
+      UpdateExpression: "SET season = :season, username = :username, totalScore = if_not_exists(totalScore, :zero) + :one, #typename = :type, createdAt = if_not_exists(createdAt, :now), updatedAt = :now ADD scoredMatches :matchIdSet",
+      ExpressionAttributeNames: { "#typename": "__typename" },
       ExpressionAttributeValues: {
         ":season": SEASON, ":username": username, ":zero": 0, ":one": 1,
-        ":type": "SeasonScore", ":now": new Date().toISOString(),
+        ":type": "SeasonScore", ":now": now,
+        ":matchId": matchId, ":matchIdSet": new Set([matchId]),
       },
-    }));
+    })).catch(e => {
+      if (e.name !== "ConditionalCheckFailedException") throw e;
+    });
   }
 }
 

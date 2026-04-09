@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { generateClient } from 'aws-amplify/api';
 import { matchesByWeek, predictionsByWeek, membersByGroup } from '../graphql/queries';
 import { useLang } from '../context/LanguageContext';
@@ -28,6 +28,7 @@ export default function WeeklyGridScreen({ group }) {
   const [grid, setGrid] = useState({});
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const weekId = getCurrentWeekId();
 
   const load = useCallback(async () => {
@@ -67,6 +68,12 @@ export default function WeeklyGridScreen({ group }) {
 
   useEffect(() => { load(); }, [load]);
 
+  async function onRefresh() {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  }
+
   if (loading) return <View style={styles.center}><ActivityIndicator color="#fff" size="large" /></View>;
   if (!matches.length) return <View style={styles.center}><Text style={styles.emptyText}>{t.noMatches}</Text></View>;
 
@@ -76,7 +83,7 @@ export default function WeeklyGridScreen({ group }) {
   return (
     <View style={styles.container}>
       <Text style={styles.weekLabel}>{fmtWeek(weekId)} · {group.name}</Text>
-      <ScrollView horizontal>
+      <ScrollView horizontal refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />}>
         <View>
           <View style={styles.row}>
             <View style={[styles.cornerCell, { width: ROW_LABEL_WIDTH }]} />
