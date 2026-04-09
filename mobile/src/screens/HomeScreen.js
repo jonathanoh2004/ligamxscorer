@@ -7,9 +7,10 @@ import MyPicksScreen from './MyPicksScreen';
 import WeeklyGridScreen from './WeeklyGridScreen';
 import GroupsScreen from './GroupsScreen';
 import LeaderboardScreen from './LeaderboardScreen';
+import AdminScreen from './AdminScreen';
 
 export default function HomeScreen() {
-  const { logout } = useAuth();
+  const { logout, isAdmin } = useAuth();
   const { t } = useLang();
   const [tab, setTab] = useState('picks');
   const [activeGroup, setActiveGroup] = useState(null);
@@ -19,6 +20,7 @@ export default function HomeScreen() {
     { key: 'grid', label: t.grid },
     { key: 'standings', label: t.standings },
     { key: 'groups', label: t.groups },
+    ...(isAdmin ? [{ key: 'admin', label: 'Admin' }] : []),
   ];
 
   function handleSelectGroup(group) {
@@ -43,6 +45,7 @@ export default function HomeScreen() {
       case 'grid': return activeGroup ? <WeeklyGridScreen group={activeGroup} /> : <NoGroupPrompt />;
       case 'standings': return activeGroup ? <LeaderboardScreen group={activeGroup} /> : <NoGroupPrompt />;
       case 'groups': return <GroupsScreen onSelectGroup={handleSelectGroup} />;
+      case 'admin': return <AdminScreen />;
       default: return null;
     }
   }
