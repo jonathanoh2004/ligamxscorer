@@ -20,5 +20,15 @@ export type AmplifyDependentResourcesAttributes = {
       "adminGroupRole": "string",
       "userGroupRole": "string"
     }
+  },
+  "function": {
+    "fixtureSync": {
+      "Arn": "string",
+      "CloudWatchEventRule": "string",
+      "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
+      "Name": "string",
+      "Region": "string"
+    }
   }
 }

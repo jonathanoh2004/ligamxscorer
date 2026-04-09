@@ -90,6 +90,22 @@
           "resourceName": "fixtureSync"
         }
       ]
+    },
+    "AMPLIFY_function_fixtureSync_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "fixtureSync"
+        }
+      ]
+    },
+    "AMPLIFY_function_fixtureSync_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "fixtureSync"
+        }
+      ]
     }
   }
 }
