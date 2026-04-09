@@ -43,3 +43,22 @@ type SeasonScore @model
   username: String!
   totalScore: Int!
 }
+
+type Group @model
+  @auth(rules: [
+    { allow: groups, groups: ["admin"], operations: [create, update, delete, read] },
+    { allow: private, operations: [read] }
+  ]) {
+  name: String!
+  joinCode: String! @index(name: "byJoinCode", queryField: "groupByJoinCode")
+  createdBy: String!
+}
+
+type GroupMember @model
+  @auth(rules: [
+    { allow: groups, groups: ["admin"], operations: [create, delete, read] },
+    { allow: private, operations: [create, read] }
+  ]) {
+  groupId: String! @index(name: "byGroup", queryField: "membersByGroup")
+  username: String! @index(name: "byUsername", queryField: "groupsByUsername")
+}

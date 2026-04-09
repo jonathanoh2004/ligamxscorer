@@ -1,52 +1,115 @@
+import { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LanguageContext';
+import LangToggle from '../components/LangToggle';
+import MyPicksScreen from './MyPicksScreen';
+import WeeklyGridScreen from './WeeklyGridScreen';
+import GroupsScreen from './GroupsScreen';
+import LeaderboardScreen from './LeaderboardScreen';
 
 export default function HomeScreen() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const { t } = useLang();
+  const [tab, setTab] = useState('picks');
+  const [activeGroup, setActiveGroup] = useState(null);
+
+  const TABS = [
+    { key: 'picks', label: t.myPicks },
+    { key: 'grid', label: t.grid },
+    { key: 'standings', label: t.standings },
+    { key: 'groups', label: t.groups },
+  ];
+
+  function handleSelectGroup(group) {
+    setActiveGroup(group);
+    setTab('grid');
+  }
+
+  function NoGroupPrompt() {
+    return (
+      <View style={styles.noGroup}>
+        <Text style={styles.noGroupText}>{t.noGroupSelected}</Text>
+        <TouchableOpacity onPress={() => setTab('groups')}>
+          <Text style={styles.noGroupLink}>{t.goToGroups}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  function renderContent() {
+    switch (tab) {
+      case 'picks': return <MyPicksScreen />;
+      case 'grid': return activeGroup ? <WeeklyGridScreen group={activeGroup} /> : <NoGroupPrompt />;
+      case 'standings': return activeGroup ? <LeaderboardScreen group={activeGroup} /> : <NoGroupPrompt />;
+      case 'groups': return <GroupsScreen onSelectGroup={handleSelectGroup} />;
+      default: return null;
+    }
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Liga MX Scorer</Text>
-      <Text style={styles.welcome}>Welcome, {user?.username}</Text>
-      <Text style={styles.placeholder}>Leaderboard coming soon...</Text>
-      <TouchableOpacity style={styles.button} onPress={logout}>
-        <Text style={styles.buttonText}>Sign Out</Text>
-      </TouchableOpacity>
+      <View style={styles.topBar}>
+        <View>
+          <Text style={styles.appName}>{t.appName}</Text>
+          {activeGroup && (tab === 'grid' || tab === 'standings') && (
+            <Text style={styles.groupPill}>{activeGroup.name}</Text>
+          )}
+        </View>
+        <View style={styles.topRight}>
+          <LangToggle />
+          <TouchableOpacity onPress={logout}>
+            <Text style={styles.signOut}>{t.signOut}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.tabBar}>
+        {TABS.map(({ key, label }) => (
+          <TouchableOpacity
+            key={key}
+            style={[styles.tab, tab === key && styles.tabActive]}
+            onPress={() => setTab(key)}
+          >
+            <Text style={[styles.tabText, tab === key && styles.tabTextActive]}>{label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={styles.content}>{renderContent()}</View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0a1628',
+  container: { flex: 1, backgroundColor: '#0a1628' },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
+    paddingHorizontal: 16,
+    paddingTop: 52,
+    paddingBottom: 12,
+    backgroundColor: '#0a1628',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a2a40',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 8,
+  appName: { color: '#fff', fontSize: 18, fontWeight: '700' },
+  groupPill: { color: '#4a9eff', fontSize: 12, marginTop: 2 },
+  topRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  signOut: { color: '#888', fontSize: 14 },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#0a1628',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a2a40',
   },
-  welcome: {
-    fontSize: 18,
-    color: '#aaa',
-    marginBottom: 32,
-  },
-  placeholder: {
-    color: '#555',
-    marginBottom: 48,
-  },
-  button: {
-    backgroundColor: '#6b1111',
-    padding: 12,
-    borderRadius: 8,
-    paddingHorizontal: 24,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 15,
-  },
+  tab: { flex: 1, paddingVertical: 10, alignItems: 'center' },
+  tabActive: { borderBottomWidth: 2, borderBottomColor: '#006847' },
+  tabText: { color: '#888', fontSize: 12, fontWeight: '500' },
+  tabTextActive: { color: '#fff' },
+  content: { flex: 1 },
+  noGroup: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  noGroupText: { color: '#888', fontSize: 15, marginBottom: 12 },
+  noGroupLink: { color: '#4a9eff', fontSize: 15 },
 });
