@@ -14,8 +14,8 @@ type Match @model
 
 type Prediction @model
   @auth(rules: [
-    { allow: owner, ownerField: "username", operations: [create, update, read] },
-    { allow: groups, groups: ["admin"], operations: [read] }
+    { allow: owner, ownerField: "username", operations: [create, update] },
+    { allow: private, operations: [read] }
   ]) {
   username: String! @index(name: "byUsername", queryField: "predictionsByUser")
   weekMatchId: String!  # format: weekId#matchId
@@ -52,6 +52,12 @@ type Group @model
   name: String!
   joinCode: String! @index(name: "byJoinCode", queryField: "groupByJoinCode")
   createdBy: String!
+}
+
+type Mutation {
+  adminSync(action: String!): String
+    @function(name: "fixtureSync-${env}")
+    @auth(rules: [{ allow: groups, groups: ["admin"] }])
 }
 
 type GroupMember @model

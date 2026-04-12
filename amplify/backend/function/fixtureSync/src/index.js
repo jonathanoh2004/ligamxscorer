@@ -220,17 +220,19 @@ async function scorePredictions(matchId, actualResult, weekId) {
 
 exports.handler = async (event) => {
   console.log("fixtureSync triggered:", JSON.stringify(event));
+  // Handle both direct invocation and AppSync resolver invocation
+  const isAppSync = event?.typeName !== undefined;
+  const action = event?.arguments?.action || event?.action;
   try {
-    const action = event?.action;
     if (action === "results") {
       await syncResults();
     } else if (action === "fixtures") {
       await syncFixtures();
     } else {
-      // Default scheduled run: sync both
       await syncFixtures();
       await syncResults();
     }
+    if (isAppSync) return "Sync complete";
     return { statusCode: 200, body: "Sync complete" };
   } catch (err) {
     console.error("fixtureSync error:", err);

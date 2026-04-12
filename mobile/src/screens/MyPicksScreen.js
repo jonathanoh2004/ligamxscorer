@@ -66,7 +66,7 @@ export default function MyPicksScreen() {
   useEffect(() => { load(); }, [load]);
 
   async function pick(match, option) {
-    if (match.locked) return;
+    if (match.locked || new Date(match.matchDate) <= new Date()) return;
     const existing = predictions[match.matchId];
     setSaving(match.matchId);
     try {
@@ -101,7 +101,7 @@ export default function MyPicksScreen() {
 
   function renderMatch({ item }) {
     const myPick = predictions[item.matchId]?.prediction;
-    const isLocked = item.locked;
+    const isLocked = item.locked || new Date(item.matchDate) <= new Date();
     const isSaving = saving === item.matchId;
 
     return (

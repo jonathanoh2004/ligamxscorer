@@ -55,9 +55,8 @@ export const onDeleteMatch = /* GraphQL */ `
 export const onCreatePrediction = /* GraphQL */ `
   subscription OnCreatePrediction(
     $filter: ModelSubscriptionPredictionFilterInput
-    $username: String
   ) {
-    onCreatePrediction(filter: $filter, username: $username) {
+    onCreatePrediction(filter: $filter) {
       username
       weekMatchId
       weekId
@@ -73,9 +72,8 @@ export const onCreatePrediction = /* GraphQL */ `
 export const onUpdatePrediction = /* GraphQL */ `
   subscription OnUpdatePrediction(
     $filter: ModelSubscriptionPredictionFilterInput
-    $username: String
   ) {
-    onUpdatePrediction(filter: $filter, username: $username) {
+    onUpdatePrediction(filter: $filter) {
       username
       weekMatchId
       weekId
@@ -91,9 +89,8 @@ export const onUpdatePrediction = /* GraphQL */ `
 export const onDeletePrediction = /* GraphQL */ `
   subscription OnDeletePrediction(
     $filter: ModelSubscriptionPredictionFilterInput
-    $username: String
   ) {
-    onDeletePrediction(filter: $filter, username: $username) {
+    onDeletePrediction(filter: $filter) {
       username
       weekMatchId
       weekId

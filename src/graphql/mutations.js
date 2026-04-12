@@ -1,6 +1,11 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
+export const adminSync = /* GraphQL */ `
+  mutation AdminSync($action: String!) {
+    adminSync(action: $action)
+  }
+`;
 export const createMatch = /* GraphQL */ `
   mutation CreateMatch(
     $input: CreateMatchInput!

@@ -4,16 +4,12 @@ import {
   ActivityIndicator, Alert, ScrollView
 } from 'react-native';
 import { generateClient } from 'aws-amplify/api';
-import { fetchAuthSession } from 'aws-amplify/auth';
-import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { matchesByWeek } from '../graphql/queries';
-import { updateMatch } from '../graphql/mutations';
+import { updateMatch, adminSync } from '../graphql/mutations';
 import { useLang } from '../context/LanguageContext';
 import dayjs from 'dayjs';
 
 const client = generateClient();
-const REGION = 'us-west-2';
-const LAMBDA_NAME = 'fixtureSync-dev';
 
 function getISOWeek(date) {
   const d = new Date(date);
@@ -28,29 +24,12 @@ function getCurrentWeekId() {
   return `${now.year()}-W${String(getISOWeek(now.toDate())).padStart(2, '0')}`;
 }
 
-async function invokeLambda(action) {
-  const session = await fetchAuthSession();
-  const creds = session.credentials;
-
-  const lambda = new LambdaClient({
-    region: REGION,
-    credentials: {
-      accessKeyId: creds.accessKeyId,
-      secretAccessKey: creds.secretAccessKey,
-      sessionToken: creds.sessionToken,
-    },
+async function invokeAdminSync(action) {
+  const res = await client.graphql({
+    query: adminSync,
+    variables: { action },
   });
-
-  const response = await lambda.send(new InvokeCommand({
-    FunctionName: LAMBDA_NAME,
-    Payload: new TextEncoder().encode(JSON.stringify({ action })),
-  }));
-
-  const result = JSON.parse(new TextDecoder().decode(response.Payload));
-  if (response.FunctionError) {
-    throw new Error(result.errorMessage || 'Lambda invocation failed');
-  }
-  return result;
+  return res.data.adminSync;
 }
 
 export default function AdminScreen() {
@@ -118,25 +97,16 @@ export default function AdminScreen() {
   }
 
   async function runSync(action) {
-    const title = action === 'fixtures' ? t.syncFixturesTitle : t.scoreResultsTitle;
-    const message = action === 'fixtures' ? t.confirmSyncFixtures : t.confirmScoreResults;
-    Alert.alert(title, message, [
-      { text: t.cancel, style: 'cancel' },
-      {
-        text: t.run, onPress: async () => {
-          setActionLoading(action);
-          try {
-            await invokeLambda(action);
-            Alert.alert(t.done, action === 'fixtures' ? t.syncedMsg : t.scoredMsg);
-            if (action === 'fixtures') load();
-          } catch (err) {
-            Alert.alert(t.errorTitle, err.message || String(err));
-          } finally {
-            setActionLoading(null);
-          }
-        }
-      },
-    ]);
+    setActionLoading(action);
+    try {
+      await invokeAdminSync(action);
+      Alert.alert(t.done, action === 'fixtures' ? t.syncedMsg : t.scoredMsg);
+      if (action === 'fixtures') load();
+    } catch (err) {
+      Alert.alert(t.errorTitle, err.message || String(err));
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   if (loading) {
@@ -185,13 +155,13 @@ export default function AdminScreen() {
             <Text style={styles.matchDate}>{fmtDate(m.matchDate)}</Text>
           </View>
           <TouchableOpacity
-            style={[styles.toggleBtn, m.locked ? styles.toggleLocked : styles.toggleOpen]}
+            style={[styles.toggleBtn, (m.locked || new Date(m.matchDate) <= new Date()) ? styles.toggleLocked : styles.toggleOpen]}
             onPress={() => toggleMatchLock(m)}
             disabled={actionLoading === m.id}
           >
             {actionLoading === m.id
               ? <ActivityIndicator color="#fff" size="small" />
-              : <Text style={styles.toggleText}>{m.locked ? t.locked2 : t.open}</Text>
+              : <Text style={styles.toggleText}>{(m.locked || new Date(m.matchDate) <= new Date()) ? t.locked2 : t.open}</Text>
             }
           </TouchableOpacity>
         </View>

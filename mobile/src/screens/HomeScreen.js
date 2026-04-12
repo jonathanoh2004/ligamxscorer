@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { generateClient } from 'aws-amplify/api';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LanguageContext';
 import LangToggle from '../components/LangToggle';
@@ -9,18 +9,43 @@ import WeeklyGridScreen from './WeeklyGridScreen';
 import GroupsScreen from './GroupsScreen';
 import LeaderboardScreen from './LeaderboardScreen';
 import AdminScreen from './AdminScreen';
+import { groupsByUsername } from '../graphql/queries';
+
+const client = generateClient();
+
+const GET_GROUP = /* GraphQL */ `
+  query GetGroup($id: ID!) { getGroup(id: $id) { id name joinCode } }
+`;
 
 export default function HomeScreen() {
-  const { logout, isAdmin } = useAuth();
+  const { logout, isAdmin, user } = useAuth();
   const { t } = useLang();
   const [tab, setTab] = useState('picks');
   const [activeGroup, setActiveGroup] = useState(null);
 
+  // On login, auto-load the user's group from the server (works across devices)
   useEffect(() => {
-    AsyncStorage.getItem('activeGroup').then(val => {
-      if (val) setActiveGroup(JSON.parse(val));
-    });
-  }, []);
+    if (!user?.username) return;
+    async function autoLoadGroup() {
+      try {
+        const res = await client.graphql({
+          query: groupsByUsername,
+          variables: { username: user.username, limit: 1 },
+        });
+        const memberships = res.data.groupsByUsername.items;
+        if (!memberships.length) return;
+        const gRes = await client.graphql({
+          query: GET_GROUP,
+          variables: { id: memberships[0].groupId },
+        });
+        const group = gRes.data.getGroup;
+        if (group) setActiveGroup(group);
+      } catch (e) {
+        console.log('Could not auto-load group', e);
+      }
+    }
+    autoLoadGroup();
+  }, [user?.username]);
 
   const TABS = [
     { key: 'picks', label: t.myPicks },
@@ -32,7 +57,6 @@ export default function HomeScreen() {
 
   function handleSelectGroup(group) {
     setActiveGroup(group);
-    AsyncStorage.setItem('activeGroup', JSON.stringify(group));
     setTab('grid');
   }
 
