@@ -63,8 +63,10 @@ type Mutation {
 type GroupMember @model
   @auth(rules: [
     { allow: groups, groups: ["admin"], operations: [create, delete, read] },
-    { allow: private, operations: [create, read] }
+    { allow: owner, ownerField: "username", operations: [create, update, delete, read] },
+    { allow: private, operations: [read] }
   ]) {
   groupId: String! @index(name: "byGroup", queryField: "membersByGroup")
   username: String! @index(name: "byUsername", queryField: "groupsByUsername")
+  displayName: String
 }

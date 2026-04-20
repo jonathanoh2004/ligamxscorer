@@ -415,6 +415,7 @@ export const membersByGroup = /* GraphQL */ `
       items {
         groupId
         username
+        displayName
         id
         createdAt
         updatedAt
@@ -443,6 +444,7 @@ export const groupsByUsername = /* GraphQL */ `
       items {
         groupId
         username
+        displayName
         id
         createdAt
         updatedAt

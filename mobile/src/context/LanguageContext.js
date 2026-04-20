@@ -31,7 +31,7 @@ const translations = {
 
     myPicks: 'My Picks',
     grid: 'Grid',
-    standings: 'Standings',
+    standings: 'Stats',
     groups: 'Groups',
 
     week: 'Week',
@@ -86,6 +86,20 @@ const translations = {
     noGroupSelected: 'No group selected.',
     goToGroups: 'Go to Groups →',
 
+    // Settings / group gate
+    settingsTitle:     'Settings',
+    yourGroupLabel:    'Your Group',
+    nameInGroup:       'Your Name in Group',
+    save:              'Save',
+    leaveGroup:        'Leave Group',
+    leaveGroupConfirm: 'Leave this group? You will need a join code to rejoin.',
+    leave:             'Leave',
+    welcomeTitle:      'Welcome to Liga MX Scorer',
+    welcomeSub:        'You need a group code to see picks and scores.',
+    joinGroupBtn:      'Join a Group',
+    orCreate:          '— or —',
+    backBtn:           'Back',
+
     // Admin
     adminTitle: 'Admin Controls',
     lockWeek: '🔒  Lock Entire Week',
@@ -107,6 +121,20 @@ const translations = {
     lockDoneMsg: 'Week locked. No more predictions accepted.',
     unlockDoneMsg: 'Week unlocked. Predictions open.',
     done: 'Done',
+
+    // Stats
+    statsOverview:  'Prediction Accuracy',
+    statsCorrect:   'Correct',
+    statsWrong:     'Wrong',
+    statsAccuracy:  'Accuracy',
+    statsTotalPicks:'Total Picks',
+    statsStreaks:   'Streaks',
+    statsCurrent:   'Current Streak',
+    statsBest:      'Best Streak',
+    statsTeamTitle: 'Most Correct by Team',
+    statsRecent:    'Recent Predictions',
+    statsWin:       'CORRECT',
+    statsLoss:      'WRONG',
 
     // Date formats
     matchDateFormat: 'ddd MMM D · h:mm A',
@@ -140,7 +168,7 @@ const translations = {
 
     myPicks: 'Mis Picks',
     grid: 'Cuadro',
-    standings: 'Tabla',
+    standings: 'Stats',
     groups: 'Grupos',
 
     week: 'Semana',
@@ -195,6 +223,20 @@ const translations = {
     noGroupSelected: 'Ningún grupo seleccionado.',
     goToGroups: 'Ir a Grupos →',
 
+    // Settings / group gate
+    settingsTitle:     'Configuración',
+    yourGroupLabel:    'Tu Grupo',
+    nameInGroup:       'Tu Nombre en el Grupo',
+    save:              'Guardar',
+    leaveGroup:        'Salir del Grupo',
+    leaveGroupConfirm: '¿Salir de este grupo? Necesitarás un código para volver a unirte.',
+    leave:             'Salir',
+    welcomeTitle:      'Bienvenido a Liga MX Scorer',
+    welcomeSub:        'Necesitas un código de grupo para ver picks y resultados.',
+    joinGroupBtn:      'Unirse a un Grupo',
+    orCreate:          '— o —',
+    backBtn:           'Regresar',
+
     // Admin
     adminTitle: 'Controles de Admin',
     lockWeek: '🔒  Cerrar Semana',
@@ -216,6 +258,20 @@ const translations = {
     lockDoneMsg: 'Semana cerrada. No se aceptan más predicciones.',
     unlockDoneMsg: 'Semana abierta. Predicciones disponibles.',
     done: 'Listo',
+
+    // Stats
+    statsOverview:  'Precisión de Predicciones',
+    statsCorrect:   'Correctas',
+    statsWrong:     'Incorrectas',
+    statsAccuracy:  'Precisión',
+    statsTotalPicks:'Total de Picks',
+    statsStreaks:   'Rachas',
+    statsCurrent:   'Racha Actual',
+    statsBest:      'Mejor Racha',
+    statsTeamTitle: 'Mayor Acierto por Equipo',
+    statsRecent:    'Predicciones Recientes',
+    statsWin:       'CORRECTO',
+    statsLoss:      'INCORRECTO',
 
     // Date formats (dayjs will use es locale for day/month names)
     matchDateFormat: 'ddd D [de] MMM · H:mm',

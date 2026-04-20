@@ -273,6 +273,7 @@ export const createGroupMember = /* GraphQL */ `
     createGroupMember(input: $input, condition: $condition) {
       groupId
       username
+      displayName
       id
       createdAt
       updatedAt
@@ -288,6 +289,7 @@ export const updateGroupMember = /* GraphQL */ `
     updateGroupMember(input: $input, condition: $condition) {
       groupId
       username
+      displayName
       id
       createdAt
       updatedAt
